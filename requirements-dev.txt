@@ -1,0 +1,3 @@
+# Runtime dependencies: none (standard library only).
+# Development / CI tooling:
+pytest>=7.0
