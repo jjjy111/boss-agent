@@ -26,27 +26,41 @@ There is nothing to install for the application itself: it runs from the reposit
 ## Usage
 
 ```bash
-python -m boss_agent add "Write the group report"
+python -m boss_agent add "Write the group report" --due 2026-11-10
+python -m boss_agent add "Book the room"
 python -m boss_agent list
+python -m boss_agent list --overdue
 ```
 
-```
-$ python -m boss_agent add "Write the group report"
+```console
+$ python -m boss_agent add "Write the group report" --due 2026-11-10
 added 3f9c1a7e  Write the group report
 
-$ python -m boss_agent list
-3f9c1a7e  Write the group report
+$ python -m boss_agent add "Read lecture notes" --due 2026-11-01
+added 85cd12b9  Read lecture notes
+
+$ python -m boss_agent list --data-file ./tasks.json
+3f9c1a7e  Write the group report  (due 2026-11-10)
+85cd12b9  Read lecture notes  (due 2026-11-01)
+
+$ python -m boss_agent list --overdue --data-file ./tasks.json
+85cd12b9  Read lecture notes  (due 2026-11-01)
 ```
 
-Tasks are stored in `~/.boss-agent/tasks.json`. Point `--data-file` (or the
-`BOSS_AGENT_DATA` environment variable) somewhere else to keep separate lists:
+A task is overdue when its due date is strictly before today, so a task due *today* is
+still on time and a task without a due date is never overdue. The overdue view is printed
+with the oldest due date first (ties broken by title) and prints `nothing overdue` when
+nothing is late.
+
+Tasks are stored in `~/.boss-agent/tasks.json`. Use `--data-file` (or the
+`BOSS_AGENT_DATA` environment variable) to keep separate lists:
 
 ```bash
-python -m boss_agent list --data-file ./tmp.json
+python -m boss_agent list --data-file ./tasks.json
 ```
 
-Exit codes: `0` success, `2` invalid input or unreadable data file (the message goes to
-stderr; the CLI never prints a traceback for user error).
+Exit codes: `0` success, `2` invalid input or unreadable data file. Messages go to stderr
+and the CLI never prints a traceback for user error.
 
 ## Tests
 
@@ -54,21 +68,23 @@ stderr; the CLI never prints a traceback for user error).
 python -m pytest -q
 ```
 
-Expected output on a clean checkout: `20 passed`. The suite is split into
+Expected output on a clean checkout: `36 passed`.
 
 | File | Level |
 | --- | --- |
 | `tests/test_models.py` | domain rules and (de)serialisation |
-| `tests/test_store.py` | persistence, corruption, ordering |
+| `tests/test_dates.py` | the single date parser and formatter |
+| `tests/test_store.py` | persistence, corruption, ordering, atomic replace |
 | `tests/test_cli.py` | end-to-end through `main`, including error paths |
+| `tests/test_due_dates.py` | acceptance tests for REQ-001 (AC1–AC5) |
 
 CI runs the same command on Python 3.9 and 3.11 for every push to `main` and every pull
 request.
 
 ## Repository layout
 
-```
-boss_agent/          application package (models, store, CLI)
+```text
+boss_agent/          application package (models, dates, store, CLI)
 tests/               pytest suite
 docs/                backlog, requirements, review records, trial write-up
 .github/             CI workflow, PR and requirement templates
@@ -76,21 +92,23 @@ EVIDENCE_INDEX.md    map from each assessment requirement to its evidence
 CONTRIBUTING.md      branching, commit, PR and review rules the team follows
 ```
 
+Writes are atomic: the task file is replaced via a temporary file and `os.replace`, so an
+interrupted save cannot truncate the list.
+
 ## Team and roles
 
-| Member | Role in the trial |
-| --- | --- |
-| Li Chenhao | Repository owner, integration and merge |
-| Jiang Yu | Requirements, backlog and documentation |
-| Huang Yuwen | Implementation and automated tests |
-| Pan Yifei | Review and evidence |
-
-> Names, GitHub handles and email addresses are placeholders until the team links its real
-> accounts (see `docs/submission-checklist.md`).
+| Member | GitHub | Role in the trial |
+| --- | --- | --- |
+| Li Chenhao | `@lichenhao` (placeholder) | Repository owner, CI, integration and merge |
+| Jiang Yu | `@jiangyu` (placeholder) | Requirements, backlog, PR description |
+| Huang Yuwen | `@huangyuwen` (placeholder) | Implementation and automated tests |
+| Pan Yifei | `@panyifei` (placeholder) | Review and evidence |
 
 ## Further reading
 
 - [docs/backlog.md](docs/backlog.md) — prioritised backlog with acceptance criteria
 - [docs/requirements/](docs/requirements) — one file per tracked requirement
+- [docs/PR-001.md](docs/PR-001.md) — the change under review, with red/green evidence
+- [docs/reviews/PR-001-review.md](docs/reviews/PR-001-review.md) — the review that changed it
 - [docs/workflow-trial.md](docs/workflow-trial.md) — what the trial produced and what we learned
 - [EVIDENCE_INDEX.md](EVIDENCE_INDEX.md) — the evidence index required for submission

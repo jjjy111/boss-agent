@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import argparse
 import sys
-from datetime import date, datetime
 from pathlib import Path
 from typing import List, Optional, Sequence, TextIO
 
+from .dates import format_due, parse_due
 from .models import Task, ValidationError
 from .store import StoreError, TaskStore
 
@@ -44,23 +44,15 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _parse_due(value: str) -> date:
-    """Turn ``YYYY-MM-DD`` into a date, or explain why it cannot be one."""
-    try:
-        return datetime.strptime(value, "%Y-%m-%d").date()
-    except ValueError as exc:
-        raise ValidationError(f"invalid date {value!r}: expected YYYY-MM-DD") from exc
-
-
 def _format_task(task: Task) -> str:
     line = f"{task.id}  {task.title}"
     if task.due is not None:
-        line += f"  (due {task.due.isoformat()})"
+        line += f"  (due {format_due(task.due)})"
     return line
 
 
 def _cmd_add(args: argparse.Namespace, out: TextIO, store: TaskStore) -> int:
-    due = _parse_due(args.due) if args.due is not None else None
+    due = parse_due(args.due) if args.due is not None else None
     task = store.add(args.title, due=due)
     out.write(f"added {task.id}  {task.title}\n")
     return 0
@@ -69,7 +61,11 @@ def _cmd_add(args: argparse.Namespace, out: TextIO, store: TaskStore) -> int:
 def _cmd_list(args: argparse.Namespace, out: TextIO, store: TaskStore) -> int:
     tasks: List[Task] = store.all()
     if args.overdue:
-        tasks = [task for task in tasks if task.is_overdue()]
+        # Oldest due date first; ties broken by title, so the view is stable.
+        tasks = sorted(
+            (task for task in tasks if task.is_overdue()),
+            key=lambda task: (task.due, task.title),
+        )
         if not tasks:
             out.write("nothing overdue\n")
             return 0

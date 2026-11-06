@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+import os
 from pathlib import Path
 
 import pytest
@@ -62,3 +64,45 @@ def test_json_that_is_not_a_list_raises_store_error(tmp_path: Path) -> None:
 
     with pytest.raises(StoreError):
         TaskStore(path).all()
+
+
+def test_record_written_before_due_dates_existed_still_loads(tmp_path: Path) -> None:
+    """A pre-change task file has no "due" key at all (REQ-001 compatibility)."""
+    path = tmp_path / "tasks.json"
+    path.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "aaaaaaaa",
+                    "title": "old task",
+                    "created_at": "2026-11-01T09:00:00+00:00",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    tasks = TaskStore(path).all()
+
+    assert [task.title for task in tasks] == ["old task"]
+    assert tasks[0].due is None
+
+
+def test_failed_write_leaves_the_previous_file_intact(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A write that fails half way must not destroy the tasks already stored (R1)."""
+    store = TaskStore(tmp_path / "tasks.json")
+    store.add("first")
+    before = store.path.read_text(encoding="utf-8")
+
+    def explode(*args: object, **kwargs: object) -> None:
+        raise OSError("no space left on device")
+
+    monkeypatch.setattr(os, "replace", explode)
+
+    with pytest.raises(StoreError):
+        store.add("second")
+
+    assert store.path.read_text(encoding="utf-8") == before
+    assert [path.name for path in tmp_path.iterdir()] == ["tasks.json"]

@@ -81,11 +81,13 @@ def test_ac3_only_past_due_dates_are_overdue(
     assert "no-due" not in out
 
 
-def test_ac4_overdue_view_contains_every_late_task(
+def test_ac4_overdue_view_is_oldest_first(
     tmp_path: Path, capsys: pytest.CaptureFixture
 ) -> None:
     data = tmp_path / "tasks.json"
     today = date.today()
+    # Added in an order that differs from the due-date order on purpose: a view that
+    # simply echoes stored order would fail this test.
     add(capsys, data, "three-days-ago", today - timedelta(days=3))
     add(capsys, data, "five-days-ago", today - timedelta(days=5))
     add(capsys, data, "one-day-ago", today - timedelta(days=1))
@@ -93,8 +95,21 @@ def test_ac4_overdue_view_contains_every_late_task(
     code, out, _ = run(["list", "--overdue", "--data-file", str(data)], capsys)
 
     assert code == 0
-    for title in ("three-days-ago", "five-days-ago", "one-day-ago"):
-        assert title in out
+    titles = [line.split("  ")[1] for line in out.splitlines() if line.strip()]
+    assert titles == ["five-days-ago", "three-days-ago", "one-day-ago"]
+
+
+def test_ac4_ties_are_broken_by_title(tmp_path: Path, capsys: pytest.CaptureFixture) -> None:
+    data = tmp_path / "tasks.json"
+    overdue_day = date.today() - timedelta(days=2)
+    add(capsys, data, "zebra", overdue_day)
+    add(capsys, data, "apple", overdue_day)
+
+    code, out, _ = run(["list", "--overdue", "--data-file", str(data)], capsys)
+
+    assert code == 0
+    titles = [line.split("  ")[1] for line in out.splitlines() if line.strip()]
+    assert titles == ["apple", "zebra"]
 
 
 def test_ac5_tasks_without_due_dates_behave_as_before(

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
 from datetime import date
 from pathlib import Path
 from typing import List, Optional
@@ -52,13 +53,35 @@ class TaskStore:
     # -- writing ---------------------------------------------------------
 
     def save(self, tasks: List[Task]) -> None:
-        """Write every task to disk, replacing the previous contents."""
+        """Replace the stored task list atomically.
+
+        The payload is written to a temporary file next to the target and then
+        renamed over it, so an interrupted write can never leave a truncated task
+        file behind: readers either see the old file or the new one.
+        """
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        payload = json.dumps([task.to_dict() for task in tasks], indent=2)
+        payload = json.dumps([task.to_dict() for task in tasks], indent=2) + "\n"
+
+        tmp_path: Optional[Path] = None
         try:
-            self.path.write_text(payload + "\n", encoding="utf-8")
+            handle_fd, tmp_name = tempfile.mkstemp(
+                dir=str(self.path.parent), prefix=f"{self.path.name}.", suffix=".tmp"
+            )
+            tmp_path = Path(tmp_name)
+            with os.fdopen(handle_fd, "w", encoding="utf-8") as handle:
+                handle.write(payload)
+                handle.flush()
+                os.fsync(handle.fileno())
+            os.replace(str(tmp_path), str(self.path))
+            tmp_path = None
         except OSError as exc:
             raise StoreError(f"cannot write {self.path}: {exc}") from exc
+        finally:
+            if tmp_path is not None:
+                try:
+                    tmp_path.unlink()
+                except OSError:
+                    pass
 
     def add(self, title: str, due: Optional[date] = None) -> Task:
         """Validate, store and return a new task."""

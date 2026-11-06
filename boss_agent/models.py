@@ -60,7 +60,10 @@ class Task:
             title = raw["title"]
             task_id = raw["id"]
             created_at = datetime.fromisoformat(raw["created_at"])
-            due = date.fromisoformat(raw["due"]) if raw["due"] is not None else None
+            # A record written before due dates existed has no "due" key at all;
+            # that means "no due date", not "corrupt record".
+            due_raw = raw.get("due")
+            due = date.fromisoformat(due_raw) if due_raw is not None else None
         except KeyError as exc:
             raise ValidationError(f"a stored task is missing {exc.args[0]!r}") from exc
         except (TypeError, ValueError) as exc:
