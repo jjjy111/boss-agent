@@ -1,0 +1,16 @@
+[project]
+name = "boss-agent"
+version = "0.1.0"
+description = "A small command-line task tracker used to trial a team development workflow"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0"]
+
+[project.scripts]
+boss-agent = "boss_agent.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
