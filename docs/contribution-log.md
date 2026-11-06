@@ -60,3 +60,23 @@ baseline). The others contributed requirements, review and integration, which is
 plausible split for a single small requirement, but the team agreed to rotate the
 implementer in iteration 2 so that no member is a single point of failure — and to have
 Pan Yifei's review load shared, since one person reviewed every diff.
+
+## Iteration 2 — completed task (REQ-002, pull request #1)
+
+Roles were rotated on purpose, after iteration 1 recorded that one member carried the
+implementation.
+
+| Member | Contribution | Evidence |
+| --- | --- | --- |
+| Jiang Yu | Requirement REQ-002 (AC1–AC5) and the pull request description with red/green evidence | `5a45636`, `813aa30` · [REQ-002](requirements/REQ-002-complete-task.md) · [PR-002](PR-002.md) |
+| Pan Yifei | Acceptance tests first, then the implementation, then the review fixes | `8e34907` (red: 5 failed / 1 passed), `70963b0` (42 passed), `c78461e` (44 passed) |
+| Huang Yuwen | Designated reviewer for REQ-002; the approval on pull request #1 is recorded in GitHub under the team's reviewer account | pull request #1, one approving review with write access |
+| Li Chenhao | Kept `main` and CI healthy: fixed the Python 3.9 job (`ubuntu-latest` is 24.04 and has no prebuilt 3.9) and integrated the published repository | `989375a`, `1ff399b`, merge of pull request #1 |
+
+### What the rotation changed
+
+Having the reviewer of round 1 write the code of round 2 produced a different review: the
+second round looked at state definitions and read consistency rather than at feature scope,
+and it caught two defects a green suite did not. The remaining imbalance is the reviewer
+role — the approval on GitHub comes from a single account with write access, and the team
+wants a second reviewer in round 3 so that no single person can block a merge.

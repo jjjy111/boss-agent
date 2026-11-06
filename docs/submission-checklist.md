@@ -8,6 +8,7 @@ Status as of 2026-11-06, after the repository was published at
 | --- | --- | --- | --- |
 | 1 | One group report in PDF: project definition, comparison of approaches, project plan, workflow trial, contribution statements | **Open** — Task 4 section drafted; the other sections belong to the other members | [report-task4-section.md](report-task4-section.md) |
 | 2 | Repository link with assessor access | **Done** — public repository, <https://github.com/jjjy111/boss-agent> | — |
+| 2a | A reviewed change visible on GitHub (Task 4) | **Done** — pull request #1, approved by a reviewer with write access, checks green on 3.9 and 3.11 | <https://github.com/jjjy111/boss-agent/pull/1> |
 | 3 | Submission commit or release identified | **Done** — tag `v0.1.0-trial` (resolve with `git describe --tags`); the merge it contains is `6afe898` | `git show v0.1.0-trial` |
 | 4 | README with setup and test instructions | **Done** | [README.md](../README.md) |
 | 5 | Evidence index: backlog, tracked requirement, reviewed change, test / automated check results | **Done** | [EVIDENCE_INDEX.md](../EVIDENCE_INDEX.md) |
@@ -39,7 +40,13 @@ Still to do on GitHub:
 2. **Settings → Collaborators** — the repository is public, so no invitation is strictly
    needed; add the assessor's GitHub account only if they ask for it.
 
-## Note on the pull request
+## Note on the pull requests
+
+Pull request #1 (REQ-002, completing a task) is the first pull request carried through the
+GitHub review flow: open → review → approval → merge commit. It is the live version of the
+in-repo review record used in iteration 1.
+
+## Note on iteration 1's review
 
 The review was conducted on the branch diff inside the repository and is recorded in
 [the review file](reviews/PR-001-review.md), with the author's response in
