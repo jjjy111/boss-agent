@@ -16,7 +16,7 @@ and at the part worth reading.
 | --- | --- | --- |
 | Repository set up with an explicit working agreement | [CONTRIBUTING.md](CONTRIBUTING.md) · `7308790` | Branch naming, commit convention, one review per PR, definition of done, merge policy |
 | Review and requirement templates the team actually used | [.github/](.github) | PR checklist, requirement issue template |
-| CI pipeline on every push and PR | [.github/workflows/ci.yml](.github/workflows/ci.yml) · `1eaee8a` | Tests run on Python 3.9 and 3.11, not only on the author's laptop |
+| CI pipeline on every push and PR | [.github/workflows/ci.yml](.github/workflows/ci.yml) · `1eaee8a` · [green run on `main`](https://github.com/jjjy111/boss-agent/actions/runs/42173055266) | Tests run on Python 3.9 and 3.11 in CI, not only on the author's laptop; the linked run is the published repository's first green run |
 
 ## 2. Tracked requirement → implementation → tests
 

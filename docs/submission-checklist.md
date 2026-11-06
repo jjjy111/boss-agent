@@ -16,24 +16,27 @@ Status as of 2026-11-06, after the repository was published at
 | 8 | APA 7 referencing, consistent | **Track** — one reference added with the Task 4 section; add it to the report's reference list | [report-task4-section.md](report-task4-section.md) |
 | 9 | Readable tables and diagrams where they help | **Done for Task 4** — timeline, AC-to-test mapping, review findings table | [workflow-trial.md](workflow-trial.md) |
 
-## Push the local history
+## Published
 
-The repository exists and the remote is configured; the history has not been pushed yet.
-From the repository root:
+Pushed over SSH to <https://github.com/jjjy111/boss-agent>:
 
-```bash
-git push -u origin main
-git push origin feat/REQ-001-due-dates     # keeps the reviewed branch visible
-git push origin --tags                      # publishes v0.1.0-trial
-```
+| Ref | State |
+| --- | --- |
+| `main` | pushed, tracks `origin/main` |
+| `feat/REQ-001-due-dates` | pushed, so the reviewed branch is visible next to the merge |
+| `v0.1.0-trial` | pushed |
 
-Then, on GitHub:
+CI runs on every push to `main`. The first run failed in `setup-python` for the Python 3.9
+matrix entry only (`ubuntu-latest` is 24.04 and has no prebuilt 3.9); the matrix was pinned
+to `ubuntu-22.04` for 3.9 in `989375a`, and the [following run](https://github.com/jjjy111/boss-agent/actions/runs/42173055266)
+is green for both 3.9 and 3.11. That failed-then-fixed pair is also a useful artefact: it
+shows the pipeline actually gates the work.
 
-1. **Actions** — the `ci` workflow runs on the push to `main` (Python 3.9 and 3.11). A green
-   run is the automated check evidence; link or screenshot it if the appendix allows.
-2. **Releases → Draft a new release** — choose the existing tag `v0.1.0-trial`, title it
+Still to do on GitHub:
+
+1. **Releases → Draft a new release** — choose the existing tag `v0.1.0-trial`, title it
    "Iteration 1 — workflow trial", and publish. That gives the assessor a stable artifact.
-3. **Settings → Collaborators** — the repository is public, so no invitation is strictly
+2. **Settings → Collaborators** — the repository is public, so no invitation is strictly
    needed; add the assessor's GitHub account only if they ask for it.
 
 ## Note on the pull request
@@ -48,8 +51,8 @@ is the evidence, and the commit graph shows the same sequence.
 
 ## Before submitting
 
-- [ ] Run the three `git push` commands above.
-- [ ] Confirm the CI run on `main` is green.
+- [x] Push `main`, the reviewed branch and the tag.
+- [x] Confirm the CI run on `main` is green (3.9 and 3.11).
 - [ ] Publish the release from tag `v0.1.0-trial`.
 - [ ] Add the four student IDs and the AUT emails to the report title page.
 - [ ] Confirm the report is under 1,500 words and that the reference list is APA 7.

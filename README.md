@@ -1,5 +1,7 @@
 # boss-agent
 
+[![ci](https://github.com/jjjy111/boss-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/jjjy111/boss-agent/actions/workflows/ci.yml)
+
 A small command-line task tracker, used by a team of four as the vehicle for the
 collaborative-workflow trial in the group assessment. The scope is deliberately narrow:
 one requirement can be carried from a tracked backlog item through implementation, tests
