@@ -1,0 +1,18 @@
+# Commit graph, captured at the submission merge (6afe898).
+# The tag v0.1.0-trial and this evidence snapshot are committed immediately after the merge,
+# so they do not appear in their own snapshot.
+
+*   6afe898 (HEAD -> main) Merge pull request #1 from feat/REQ-001-due-dates
+|\  
+| * acaa725 (feat/REQ-001-due-dates) docs(REQ-001): re-review the revision and approve the PR
+| * 9ba0e3e refactor(REQ-001): address the review findings R1-R5
+| * f5e9a42 docs(REQ-001): record the PR review with changes requested
+| * 15b2efd docs(REQ-001): add PR description with red/green evidence
+| * c89a638 feat(REQ-001): store due dates and add the overdue view
+| * 7284baa test(REQ-001): add acceptance tests for due dates and the overdue view
+|/  
+* 1eaee8a chore(ci): add test pipeline and setup/test instructions
+* b5830ae feat(REQ-000): add task capture and listing for iteration 1
+* 055b383 docs(REQ-001): add tracked requirement with acceptance criteria
+* 41084c8 docs: add prioritised backlog with testable acceptance criteria
+* 7308790 chore: initialise repository scaffold and contribution rules

@@ -14,7 +14,7 @@ Legend: **P1** must ship in iteration 1 · **P2** should ship in iteration 2 ·
 | --- | --- | --- | --- | --- | --- |
 | B1 | P1 | Capture a task from the command line | Given no stored tasks, when I run `add "Write report"`, then the task is stored and `list` shows it; given an empty title, when I run `add ""`, then the command fails with a readable message and stores nothing | Huang Yuwen | Done (REQ-000, baseline) |
 | B2 | P1 | List stored tasks | Given two stored tasks, when I run `list`, then both appear, oldest first, one per line | Huang Yuwen | Done (REQ-000, baseline) |
-| B3 | P1 | Task due dates and an overdue view | See [REQ-001](requirements/REQ-001-task-due-dates.md) — AC1–AC5 | Huang Yuwen | In review (REQ-001) |
+| B3 | P1 | Task due dates and an overdue view | See [REQ-001](requirements/REQ-001-task-due-dates.md) — AC1–AC5 | Huang Yuwen | Done (REQ-001, merge `6afe898`) |
 | B4 | P2 | Complete a task | Given an open task, when I run `done <id>`, then it no longer appears in the overdue view and `list` marks it done; given an unknown id, then exit code is non-zero and nothing changes | Huang Yuwen | Iteration 2 |
 | B5 | P2 | Search tasks by keyword | Given tasks "write report" and "book room", when I run `list --search report`, then only the first is shown; matching is case-insensitive | Pan Yifei | Iteration 2 |
 | B6 | P2 | Export tasks to Markdown | Given stored tasks, when I run `export --format md`, then a Markdown table with title, due date and status is printed and is valid Markdown | Pan Yifei | Iteration 2 |

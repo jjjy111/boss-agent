@@ -73,10 +73,11 @@ iteration 2).
 
 | Artefact | Link |
 | --- | --- |
-| Acceptance tests | `tests/test_due_dates.py` |
-| Pull request | [#1](https://github.com/OWNER/boss-agent/pull/1) |
-| Review record | [PR-001 review](../reviews/PR-001-review.md) |
-| Merge commit | recorded in [EVIDENCE_INDEX.md](../../EVIDENCE_INDEX.md) |
+| Acceptance tests | `tests/test_due_dates.py` (`7284baa`, strengthened in `9ba0e3e`) |
+| Implementation | `c89a638` (revised in `9ba0e3e`) |
+| Pull request | `feat/REQ-001-due-dates` → `main`, merged as `6afe898` · [PR description](../PR-001.md) |
+| Review record | [PR-001 review](../reviews/PR-001-review.md) (`f5e9a42`, approved in `acaa725`) |
+| Merge commit | `6afe898` (merge commit on `main`), tag `v0.1.0-trial` |
 
 > The PR link becomes valid once the repository is published under the team's GitHub
 > organisation; the local history and the review record in this repository are the

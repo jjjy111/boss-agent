@@ -2,7 +2,7 @@
 
 | Field | Value |
 | --- | --- |
-| PR | [#1](https://github.com/OWNER/boss-agent/pull/1) — `feat(REQ-001): store due dates and add the overdue view` |
+| PR | `feat/REQ-001-due-dates` → `main` — `feat(REQ-001): store due dates and add the overdue view` (merged as `6afe898`) |
 | Author | Huang Yuwen |
 | Reviewer | Pan Yifei |
 | Reviewed | 2026-11-06, 15:58 |
@@ -140,7 +140,7 @@ five findings in one pass, and each fix comes with a test that would fail withou
   `one-day-ago`.
 - **R3** — `raw.get("due")` plus a regression test that loads a record without the key.
   The `/tmp/legacy.json` file from my first pass now lists correctly.
-- **R4** — `boss_agent/dates.py` owns parsing and formatting, with seven cases including a
+- **R4** — `boss_agent/dates.py` owns parsing and formatting, with eight test cases including a
   leap day and five rejected inputs.
 - **R5** — README documents both new flags, the ordering rules, the exit codes and the
   current count.
