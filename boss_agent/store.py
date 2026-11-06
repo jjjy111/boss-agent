@@ -83,6 +83,41 @@ class TaskStore:
                 except OSError:
                     pass
 
+    @staticmethod
+    def _resolve_in(tasks: List[Task], task_id: str) -> Task:
+        """Find one task in an already-loaded snapshot, by id or unique prefix."""
+        if not task_id.strip():
+            raise ValidationError("a task id is required")
+        exact = [task for task in tasks if task.id == task_id]
+        if exact:
+            return exact[0]
+        matches = [task for task in tasks if task.id.startswith(task_id)]
+        if not matches:
+            raise ValidationError(f"no task with id {task_id!r}")
+        if len(matches) > 1:
+            raise ValidationError(
+                f"id {task_id!r} matches {len(matches)} tasks; use a longer prefix"
+            )
+        return matches[0]
+
+    def resolve(self, task_id: str) -> Task:
+        """Find one task by exact id or by a unique id prefix."""
+        return self._resolve_in(self.all(), task_id)
+
+    def complete(self, task_id: str) -> Task:
+        """Mark a task done and persist it. Completing twice changes nothing.
+
+        The file is read once: resolving and updating work on the same snapshot, so a
+        concurrent write cannot land between the lookup and the save.
+        """
+        tasks = self.all()
+        target = self._resolve_in(tasks, task_id)
+        completed = target.mark_done()
+        if completed == target:
+            return target
+        self.save([completed if task.id == target.id else task for task in tasks])
+        return completed
+
     def add(self, title: str, due: Optional[date] = None) -> Task:
         """Validate, store and return a new task."""
         task = Task(title=title, due=due)
