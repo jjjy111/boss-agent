@@ -72,14 +72,21 @@ def test_ac2_ambiguous_prefix_is_rejected(
     tmp_path: Path, capsys: pytest.CaptureFixture
 ) -> None:
     data = tmp_path / "tasks.json"
-    add(capsys, data, "first")
-    add(capsys, data, "second")
+    data.write_text(
+        json.dumps(
+            [
+                {"id": "abcd1111", "title": "first", "created_at": "2026-11-01T09:00:00+00:00"},
+                {"id": "abcd2222", "title": "second", "created_at": "2026-11-01T09:00:01+00:00"},
+            ]
+        ),
+        encoding="utf-8",
+    )
     before = data.read_bytes()
 
-    code, _, err = run(["done", "", "--data-file", str(data)], capsys)
+    code, _, err = run(["done", "abcd", "--data-file", str(data)], capsys)
 
     assert code == 2
-    assert "no task" in err.lower() or "matches" in err.lower()
+    assert "matches" in err.lower()
     assert data.read_bytes() == before
 
 

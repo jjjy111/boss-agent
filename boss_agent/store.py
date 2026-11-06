@@ -83,6 +83,33 @@ class TaskStore:
                 except OSError:
                     pass
 
+    def resolve(self, task_id: str) -> Task:
+        """Find one task by exact id or by a unique id prefix."""
+        if not task_id.strip():
+            raise ValidationError("a task id is required")
+        tasks = self.all()
+        exact = [task for task in tasks if task.id == task_id]
+        if exact:
+            return exact[0]
+        matches = [task for task in tasks if task.id.startswith(task_id)]
+        if not matches:
+            raise ValidationError(f"no task with id {task_id!r}")
+        if len(matches) > 1:
+            raise ValidationError(
+                f"id {task_id!r} matches {len(matches)} tasks; use a longer prefix"
+            )
+        return matches[0]
+
+    def complete(self, task_id: str) -> Task:
+        """Mark a task done and persist it. Completing twice changes nothing."""
+        target = self.resolve(task_id)
+        completed = target.mark_done()
+        if completed == target:
+            return target
+        tasks = [completed if task.id == target.id else task for task in self.all()]
+        self.save(tasks)
+        return completed
+
     def add(self, title: str, due: Optional[date] = None) -> Task:
         """Validate, store and return a new task."""
         task = Task(title=title, due=due)

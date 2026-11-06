@@ -31,6 +31,7 @@ There is nothing to install for the application itself: it runs from the reposit
 python -m boss_agent add "Write the group report" --due 2026-11-10
 python -m boss_agent add "Book the room"
 python -m boss_agent list
+python -m boss_agent done 3f9c1a7e
 python -m boss_agent list --overdue
 ```
 
@@ -45,9 +46,20 @@ $ python -m boss_agent list --data-file ./tasks.json
 3f9c1a7e  Write the group report  (due 2026-11-10)
 85cd12b9  Read lecture notes  (due 2026-11-01)
 
+$ python -m boss_agent done 85cd12b9 --data-file ./tasks.json
+completed 85cd12b9  Read lecture notes
+
+$ python -m boss_agent list --data-file ./tasks.json
+3f9c1a7e  Write the group report  (due 2026-11-10)
+85cd12b9  Read lecture notes  (due 2026-11-01)  [done]
+
 $ python -m boss_agent list --overdue --data-file ./tasks.json
-85cd12b9  Read lecture notes  (due 2026-11-01)
+nothing overdue
 ```
+
+`done` accepts a full task id or any unique prefix of it. Completed tasks keep their place
+in `list` with a `[done]` marker and stop appearing in the overdue view; completing the same
+task twice is a no-op.
 
 A task is overdue when its due date is strictly before today, so a task due *today* is
 still on time and a task without a due date is never overdue. The overdue view is printed
@@ -70,7 +82,7 @@ and the CLI never prints a traceback for user error.
 python -m pytest -q
 ```
 
-Expected output on a clean checkout: `36 passed`.
+Expected output on a clean checkout: `42 passed`.
 
 | File | Level |
 | --- | --- |
@@ -79,6 +91,7 @@ Expected output on a clean checkout: `36 passed`.
 | `tests/test_store.py` | persistence, corruption, ordering, atomic replace |
 | `tests/test_cli.py` | end-to-end through `main`, including error paths |
 | `tests/test_due_dates.py` | acceptance tests for REQ-001 (AC1–AC5) |
+| `tests/test_complete_task.py` | acceptance tests for REQ-002 (completing a task) |
 
 CI runs the same command on Python 3.9 and 3.11 for every push to `main` and every pull
 request.

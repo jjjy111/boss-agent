@@ -41,6 +41,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     show.set_defaults(handler=_cmd_list)
 
+    done = sub.add_parser("done", parents=[common], help="mark a task as done")
+    done.add_argument("task_id", help="the task id, or a unique prefix of it")
+    done.set_defaults(handler=_cmd_done)
+
     return parser
 
 
@@ -48,6 +52,8 @@ def _format_task(task: Task) -> str:
     line = f"{task.id}  {task.title}"
     if task.due is not None:
         line += f"  (due {format_due(task.due)})"
+    if task.done:
+        line += "  [done]"
     return line
 
 
@@ -74,6 +80,12 @@ def _cmd_list(args: argparse.Namespace, out: TextIO, store: TaskStore) -> int:
         return 0
     for task in tasks:
         out.write(_format_task(task) + "\n")
+    return 0
+
+
+def _cmd_done(args: argparse.Namespace, out: TextIO, store: TaskStore) -> int:
+    task = store.complete(args.task_id)
+    out.write(f"completed {task.id}  {task.title}\n")
     return 0
 
 
