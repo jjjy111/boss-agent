@@ -6,7 +6,7 @@
 | Author | Huang Yuwen |
 | Reviewer | Pan Yifei |
 | Reviewed | 2026-11-06, 15:58 |
-| Verdict | **Changes requested** (3 major, 2 minor) |
+| Verdict | **Approved** — changes requested at first pass, addressed in `9ba0e3e` |
 
 ## Summary
 
@@ -24,11 +24,11 @@ Two minor points are about consistency and documentation.
 
 | ID | Severity | Location | Finding | Status |
 | --- | --- | --- | --- | --- |
-| R1 | Major | `boss_agent/store.py:54-60` | `save()` overwrites the task file in place; an interruption mid-write leaves a truncated file and every stored task is lost | Open |
-| R2 | Major | `boss_agent/cli.py:69-82` | `list --overdue` returns creation order, not oldest-due-first as AC4 requires; the AC4 test only asserts that the titles appear, so the gap is invisible | Open |
-| R3 | Major | `boss_agent/models.py:63` | `from_dict` reads `raw["due"]`; records written before this change have no `due` key and now raise `a stored task is missing 'due'`, so existing task files stop loading | Open |
-| R4 | Minor | `boss_agent/cli.py:47-52` | Date parsing sits in the CLI, but the requirement's design note says parsing is centralised in one module so the CLI and the store cannot disagree | Open |
-| R5 | Minor | `README.md:57` | README still says `20 passed` and documents neither `--due` nor `--overdue` | Open |
+| R1 | Major | `boss_agent/store.py:54-60` | `save()` overwrites the task file in place; an interruption mid-write leaves a truncated file and every stored task is lost | Resolved in `9ba0e3e` |
+| R2 | Major | `boss_agent/cli.py:69-82` | `list --overdue` returns creation order, not oldest-due-first as AC4 requires; the AC4 test only asserts that the titles appear, so the gap is invisible | Resolved in `9ba0e3e` |
+| R3 | Major | `boss_agent/models.py:63` | `from_dict` reads `raw["due"]`; records written before this change have no `due` key and now raise `a stored task is missing 'due'`, so existing task files stop loading | Resolved in `9ba0e3e` |
+| R4 | Minor | `boss_agent/cli.py:47-52` | Date parsing sits in the CLI, but the requirement's design note says parsing is centralised in one module so the CLI and the store cannot disagree | Resolved in `9ba0e3e` |
+| R5 | Minor | `README.md:57` | README still says `20 passed` and documents neither `--due` nor `--overdue` | Resolved in `9ba0e3e` |
 
 ## R1 — the write path is not crash-safe (major)
 
@@ -124,3 +124,29 @@ behaviour.
 4. R4, R5 — extract `boss_agent/dates.py`; update the README.
 
 I will re-review the follow-up commit the same day.
+
+## Re-review (2026-11-06, 16:35)
+
+The follow-up commit `refactor(REQ-001): address the review findings R1-R5` addresses all
+five findings in one pass, and each fix comes with a test that would fail without it.
+
+- **R1** — `save()` now uses a temporary file, `fsync` and `os.replace`. The new test
+  replaces `os.replace` with a failing stub and asserts that the previous file is byte
+  identical afterwards and no temporary file is left behind. That is the right shape of
+  test: it fails on the old code and passes on the new one.
+- **R2** — the view is sorted by `(due, title)`; `test_ac4_overdue_view_is_oldest_first`
+  now asserts the exact order and a second test covers the tie-break. I re-ran my own
+  reproduction from the first pass and the output is now `five-days-ago`, `three-days-ago`,
+  `one-day-ago`.
+- **R3** — `raw.get("due")` plus a regression test that loads a record without the key.
+  The `/tmp/legacy.json` file from my first pass now lists correctly.
+- **R4** — `boss_agent/dates.py` owns parsing and formatting, with seven cases including a
+  leap day and five rejected inputs.
+- **R5** — README documents both new flags, the ordering rules, the exit codes and the
+  current count.
+
+Verified on the branch: `36 passed`. Manual run of `add --due`, `list`, `list --overdue`
+and the invalid-date path all behave as documented. Nothing new was added that the
+requirement does not ask for.
+
+**Verdict: approved for merge.**
