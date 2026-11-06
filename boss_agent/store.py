@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+from datetime import date
 from pathlib import Path
 from typing import List, Optional
 
@@ -59,9 +60,9 @@ class TaskStore:
         except OSError as exc:
             raise StoreError(f"cannot write {self.path}: {exc}") from exc
 
-    def add(self, title: str) -> Task:
+    def add(self, title: str, due: Optional[date] = None) -> Task:
         """Validate, store and return a new task."""
-        task = Task(title=title)
+        task = Task(title=title, due=due)
         tasks = self.all()
         tasks.append(task)
         self.save(tasks)

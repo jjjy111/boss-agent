@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import sys
+from datetime import date, datetime
 from pathlib import Path
 from typing import List, Optional, Sequence, TextIO
 
@@ -12,7 +13,7 @@ from .store import StoreError, TaskStore
 
 
 def build_parser() -> argparse.ArgumentParser:
-    """Build the argument parser for the two iteration-1 commands."""
+    """Build the argument parser for the iteration-1 commands."""
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument(
         "--data-file",
@@ -29,31 +30,54 @@ def build_parser() -> argparse.ArgumentParser:
 
     add = sub.add_parser("add", parents=[common], help="capture a task")
     add.add_argument("title", help="what needs doing")
+    add.add_argument("--due", default=None, metavar="YYYY-MM-DD", help="when it is due")
     add.set_defaults(handler=_cmd_add)
 
     show = sub.add_parser("list", parents=[common], help="list stored tasks")
+    show.add_argument(
+        "--overdue",
+        action="store_true",
+        help="only tasks whose due date has already passed",
+    )
     show.set_defaults(handler=_cmd_list)
 
     return parser
 
 
-def _print_task(out: TextIO, task: Task) -> None:
-    out.write(f"{task.id}  {task.title}\n")
+def _parse_due(value: str) -> date:
+    """Turn ``YYYY-MM-DD`` into a date, or explain why it cannot be one."""
+    try:
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    except ValueError as exc:
+        raise ValidationError(f"invalid date {value!r}: expected YYYY-MM-DD") from exc
+
+
+def _format_task(task: Task) -> str:
+    line = f"{task.id}  {task.title}"
+    if task.due is not None:
+        line += f"  (due {task.due.isoformat()})"
+    return line
 
 
 def _cmd_add(args: argparse.Namespace, out: TextIO, store: TaskStore) -> int:
-    task = store.add(args.title)
+    due = _parse_due(args.due) if args.due is not None else None
+    task = store.add(args.title, due=due)
     out.write(f"added {task.id}  {task.title}\n")
     return 0
 
 
 def _cmd_list(args: argparse.Namespace, out: TextIO, store: TaskStore) -> int:
     tasks: List[Task] = store.all()
+    if args.overdue:
+        tasks = [task for task in tasks if task.is_overdue()]
+        if not tasks:
+            out.write("nothing overdue\n")
+            return 0
     if not tasks:
         out.write("no tasks yet\n")
         return 0
     for task in tasks:
-        _print_task(out, task)
+        out.write(_format_task(task) + "\n")
     return 0
 
 
