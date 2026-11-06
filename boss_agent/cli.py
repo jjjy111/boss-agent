@@ -49,11 +49,13 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def _format_task(task: Task) -> str:
+    # Status sits next to the title so a scan of the list reads "what is finished" first,
+    # then "what is due".
     line = f"{task.id}  {task.title}"
-    if task.due is not None:
-        line += f"  (due {format_due(task.due)})"
     if task.done:
         line += "  [done]"
+    if task.due is not None:
+        line += f"  (due {format_due(task.due)})"
     return line
 
 

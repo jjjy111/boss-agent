@@ -148,3 +148,47 @@ def test_ac5_unique_prefix_works_and_second_call_is_harmless(
     code, _, err = run(["done", task_id, "--data-file", str(data)], capsys)
     assert code == 0, err
     assert stored(data)[0]["completed_at"] == first_timestamp
+
+
+def test_ac4_done_without_timestamp_reads_as_unknown_time(
+    tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+    """A hand-edited record can say done without a timestamp; that must still load (R2)."""
+    data = tmp_path / "tasks.json"
+    data.write_text(
+        json.dumps(
+            [
+                {
+                    "id": "bbbb1111",
+                    "title": "done without a stamp",
+                    "done": True,
+                    "created_at": "2026-11-01T09:00:00+00:00",
+                }
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    code, out, _ = run(["list", "--data-file", str(data)], capsys)
+
+    assert code == 0
+    assert "done without a stamp  [done]" in out
+
+
+def test_ac1_status_marker_sits_next_to_the_title(
+    tmp_path: Path, capsys: pytest.CaptureFixture
+) -> None:
+    """The [done] marker comes before the due date, not after it (R3)."""
+    data = tmp_path / "tasks.json"
+    code, out, _ = run(
+        ["add", "Write report", "--due", "2026-12-01", "--data-file", str(data)], capsys
+    )
+    assert code == 0
+    task_id = out.split()[1]
+    run(["done", task_id, "--data-file", str(data)], capsys)
+
+    _, out, _ = run(["list", "--data-file", str(data)], capsys)
+
+    line = next(line for line in out.splitlines() if "Write report" in line)
+    assert "[done]" in line
+    assert line.index("[done]") < line.index("(due")

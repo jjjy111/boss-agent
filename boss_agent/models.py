@@ -84,6 +84,9 @@ class Task:
             due_raw = raw.get("due")
             due = date.fromisoformat(due_raw) if due_raw is not None else None
             # Both keys are optional: a file written before completing existed has neither.
+            # A record can also say done without a timestamp (hand-edited file); that is
+            # read as "completed, time unknown" rather than rejected, because the task is
+            # still finished and refusing to load the whole file would lose the other tasks.
             done = bool(raw.get("done", False))
             completed_raw = raw.get("completed_at")
             completed_at = (

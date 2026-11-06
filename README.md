@@ -51,7 +51,7 @@ completed 85cd12b9  Read lecture notes
 
 $ python -m boss_agent list --data-file ./tasks.json
 3f9c1a7e  Write the group report  (due 2026-11-10)
-85cd12b9  Read lecture notes  (due 2026-11-01)  [done]
+85cd12b9  Read lecture notes  [done]  (due 2026-11-01)
 
 $ python -m boss_agent list --overdue --data-file ./tasks.json
 nothing overdue
