@@ -94,3 +94,41 @@ the fact; the review happened on the diff in this repository and is recorded in
 the code, the red and green test runs and the review findings are all real and
 reproducible from the commit history; the GitHub links in the documents point at the
 repository once it is published.
+
+## 7. Iteration 2 — the same loop with a different implementer
+
+Section 4 recorded that one member carried the whole implementation. Iteration 2 opened with
+B4 (complete a task) and rotated the roles: Pan Yifei implemented, Huang Yuwen was the
+designated reviewer, Jiang Yu wrote the requirement and the pull request description, Li
+Chenhao kept integration.
+
+What stayed the same: a tracked requirement first (REQ-002, AC1–AC5), acceptance tests
+committed before the implementation, and a pull request that maps every criterion to the test
+that proves it.
+
+What the second review round found, in a diff of roughly 480 added lines:
+
+1. **A read-twice bug.** `complete()` resolved the task through `all()` and then read the
+   file again to build the updated list, so a concurrent `add` could land between the
+   lookup and the save. Fixed by resolving and updating against one snapshot.
+2. **An undefined state.** `done: true` without `completed_at` was accepted by the model but
+   never defined: the validator only enforced the other direction. The team chose to accept
+   it as "completed, time unknown" — rejecting the record would make the whole file
+   unreadable — and pinned the decision with a test.
+3. **A display decision that made a test possible.** The `[done]` marker sat after the due
+   date; moving it next to the title made "is it finished?" the first thing a scan answers.
+
+Again, findings 1 and 2 were invisible to a green suite of 42 tests. That is now three
+iterations of evidence for the same lesson: review reads failure modes that tests do not
+encode.
+
+## 8. Where the process stands
+
+| Round | Requirement | Review findings | Tests at merge |
+| --- | --- | --- | --- |
+| 1 | REQ-001 due dates and overdue view | 5 (3 blocking) | 36 |
+| 2 | REQ-002 complete a task | 3 (2 blocking) | 44 |
+
+The cost is stable: about two and a half hours per small requirement, of which roughly a
+third is process. The next constraint is not the workflow but the backlog — B5 and B6 are
+still unstarted, and neither has a user-facing story yet.

@@ -48,7 +48,18 @@ and at the part worth reading.
 | What the team learned and what it will change in iteration 2 | [workflow-trial.md](docs/workflow-trial.md) § 4–5 | Reflection tied to concrete events, not generic statements |
 | Contribution record with links per member | [docs/contribution-log.md](docs/contribution-log.md) | Who did what, with the artefact that proves it |
 
-## 5. Submission items
+## 5. Iteration 2 — the workflow repeated on a new requirement
+
+| Evidence | Path / commit | What it shows |
+| --- | --- | --- |
+| Requirement for completing a task (AC1–AC5) | [docs/requirements/REQ-002-complete-task.md](docs/requirements/REQ-002-complete-task.md) · `5a45636` | The loop starts from a tracked requirement again, not from code |
+| Acceptance tests before the implementation | `8e34907` · [tests/test_complete_task.py](tests/test_complete_task.py) | Red state: 5 failed, 1 passed |
+| Implementation | `70963b0` | 42 passed |
+| Review fixes: one snapshot per operation, defined `done`-without-timestamp, marker placement | `c78461e` | 44 passed; each finding has a test |
+| Pull request with a real review and an approving review | <https://github.com/jjjy111/boss-agent/pull/1> · merged as `17be3d2` | GitHub shows the diff, the checks on 3.9 and 3.11, and one approving review by a reviewer with write access |
+| Pull request description | [docs/PR-002.md](docs/PR-002.md) · `813aa30` | AC-to-test mapping, red/green runs, review replies |
+
+## 6. Submission items
 
 | Evidence | Path | What it shows |
 | --- | --- | --- |
