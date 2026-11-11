@@ -1,0 +1,10 @@
+{
+  "name": "job-agent-mvp",
+  "private": true,
+  "scripts": {
+    "collect:boss": "node collector/boss_worker.cjs"
+  },
+  "dependencies": {
+    "playwright": "^1.62.0"
+  }
+}

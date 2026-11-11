@@ -1,129 +1,63 @@
-# boss-agent
+# BOSS - Agent MVP
 
-[![ci](https://github.com/jjjy111/boss-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/jjjy111/boss-agent/actions/workflows/ci.yml)
+本地运行的产品求职工作台：BOSS 岗位采集、岗位归档、通用简历版本、DeepSeek 定制简历、A4 在线编辑、PDF 导出与定稿确认。
 
-A small command-line task tracker, used by a team of four as the vehicle for the
-collaborative-workflow trial in the group assessment. The scope is deliberately narrow:
-one requirement can be carried from a tracked backlog item through implementation, tests
-and review inside a short iteration.
+BOSS - Agent 只在本机准备材料，**不代替用户向 BOSS 发送任何消息**，也不读取或上传 BOSS 的 Cookie。
 
-- **Status:** iteration 1, version 0.1.0
-- **Language:** Python 3.9+ · **Runtime dependencies:** none (standard library only)
-- **Tests:** `pytest` · **CI:** GitHub Actions (`.github/workflows/ci.yml`)
+## 启动
 
-## Setup
-
-Requirements: Python 3.9 or newer and `git`.
+macOS 可直接双击项目中的 `启动求职Agent.command`。也可以在项目目录运行：
 
 ```bash
-git clone <this repository>
-cd boss-agent
 python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
-python -m pip install -r requirements-dev.txt
+.venv/bin/pip install -r requirements.txt
+.venv/bin/python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-There is nothing to install for the application itself: it runs from the repository root.
+打开 <http://127.0.0.1:8000/>。网页和每日任务依赖这个终端持续运行。
 
-## Usage
+## BOSS 岗位采集
 
-```bash
-python -m boss_agent add "Write the group report" --due 2026-11-10
-python -m boss_agent add "Book the room"
-python -m boss_agent list
-python -m boss_agent done 3f9c1a7e
-python -m boss_agent list --overdue
-```
+采集器使用项目自带的 Manifest V3 Chrome 扩展，不再使用 Playwright、远程调试端口或 CDP 控制浏览器。BOSS - Agent、BOSS 和扩展都运行在平时使用的同一个 Chrome 中。Chrome 137 及以上不再接受命令行自动加载本地扩展，因此首次使用需要手动安装一次。
 
-```console
-$ python -m boss_agent add "Write the group report" --due 2026-11-10
-added 3f9c1a7e  Write the group report
+首次切换到扩展版时：
 
-$ python -m boss_agent add "Read lecture notes" --due 2026-11-01
-added 85cd12b9  Read lecture notes
+1. 在打开BOSS - Agent 的当前 Chrome 中，新建标签页并输入 `chrome://extensions/`。
+2. 开启右上角“开发者模式”。返回BOSS - Agent 点击“① 打开扩展文件夹”，然后在扩展管理页点击“加载已解压的扩展程序”，选择 Finder 中的 `extension` 文件夹。这个步骤只需完成一次。
+3. 返回BOSS - Agent 点击“② 打开 BOSS”，在新标签页登录；遇到安全验证时手动完成，并保持 Chrome 打开。
+4. 返回BOSS - Agent。页面会自动刷新状态；看到“扩展在线 · BOSS 已登录”后点击“立即采集”。
 
-$ python -m boss_agent list --data-file ./tasks.json
-3f9c1a7e  Write the group report  (due 2026-11-10)
-85cd12b9  Read lecture notes  (due 2026-11-01)
+采集任务按杭州、宁波、上海排序，搜索产品相关岗位并读取完整 JD；排除标题含“运营”、明确要求硕士或博士、以及明确要求两年以上经验的岗位。扩展会读取可见列表分页和岗位详情，并把结果写入本地 SQLite。
 
-$ python -m boss_agent done 85cd12b9 --data-file ./tasks.json
-completed 85cd12b9  Read lecture notes
+- 只有三座城市和完整 JD 均扫描完成时，才归档本次未再出现的旧岗位。
+- 登录失效、安全验证、列表不完整或详情缺失都会保存为失败/部分完成，不会误归档旧岗位。
+- 采集只在点击“立即采集”时触发；应用不再注册任何定时任务，电脑只需在采集时保持唤醒。
+- BOSS 登录状态由当前 Chrome 自己保存；扩展只访问 `zhipin.com` 和本机 `127.0.0.1:8000`，不会读取或上传 Cookie 内容。
 
-$ python -m boss_agent list --data-file ./tasks.json
-3f9c1a7e  Write the group report  (due 2026-11-10)
-85cd12b9  Read lecture notes  [done]  (due 2026-11-01)
+BOSS 页面结构或安全策略可能变化。若页面要求验证，采集会暂停并保留对应页面，完成验证后重新点击“立即采集”。请避免短时间内高频重复运行。
 
-$ python -m boss_agent list --overdue --data-file ./tasks.json
-nothing overdue
-```
+## DeepSeek 定制简历
 
-`done` accepts a full task id or any unique prefix of it. Completed tasks keep their place
-in `list` with a `[done]` marker and stop appearing in the overdue view; completing the same
-task twice is a no-op.
+1. 在项目根目录 `.env` 填写 `DEEPSEEK_API_KEY`；该文件已被 Git 忽略。
+2. 在岗位详情选择一个通用简历版本，点击“根据岗位生成简历”。同一岗位与同一通用版本再次生成会覆盖当前草稿。
+3. 系统保留通用简历全部原始内容，只允许换序、润色和有事实依据的补充；同时保存修改原因、JD 关键词覆盖和风险。
+4. 点击“编辑定制简历”会在新标签页打开 A4 编辑器。确认前，仅与通用版本不同的文字显示淡黄色高亮。
+5. 点击“确认修改并定稿”后高亮永久消失，但仍可继续编辑、预览和导出 PDF。导出后可点击“确认 PDF 定稿”，记录该岗位的材料已经定稿。
 
-A task is overdue when its due date is strictly before today, so a task due *today* is
-still on time and a task without a due date is never overdue. The overdue view is printed
-with the oldest due date first (ties broken by title) and prints `nothing overdue` when
-nothing is late.
+证件照按通用简历版本保存在本机。可在通用简历编辑页点击“上传”绑定照片；该版本生成的定制简历会自动继承并显示在右上角，“另存为新版本”也会复制照片。更新或删除照片后，已生成的定制简历需要重新导出并确认。
 
-Tasks are stored in `~/.boss-agent/tasks.json`. Use `--data-file` (or the
-`BOSS_AGENT_DATA` environment variable) to keep separate lists:
+API Key 仅由本机后端读取，不会返回给浏览器。
 
-```bash
-python -m boss_agent list --data-file ./tasks.json
-```
+## 范围说明
 
-Exit codes: `0` success, `2` invalid input or unreadable data file. Messages go to stderr
-and the CLI never prints a traceback for user error.
+早先版本在确认 PDF 后会自动截图、生成打招呼文案，并通过 Chrome 扩展向 BOSS 发送文字和简历图片。这条投递链路已经移除：`backend/delivery.py`、`Application`/`BossSendTask` 两张表、`/api/tailored/{id}/apply`、`/send-preview`、`/send`、`/api/applications` 以及扩展里的发送任务都已删除。
 
-## Tests
+现在的流程在“确认 PDF 定稿”结束，材料留在本机，是否发送、如何发送由用户在 BOSS 页面自行决定。历史数据库中可能仍残留 `applications`、`boss_send_tasks` 两张旧表，它们不再被读取，可以直接忽略或手动删除。
 
-```bash
-python -m pytest -q
-```
+## 目录
 
-Expected output on a clean checkout: `42 passed`.
-
-| File | Level |
-| --- | --- |
-| `tests/test_models.py` | domain rules and (de)serialisation |
-| `tests/test_dates.py` | the single date parser and formatter |
-| `tests/test_store.py` | persistence, corruption, ordering, atomic replace |
-| `tests/test_cli.py` | end-to-end through `main`, including error paths |
-| `tests/test_due_dates.py` | acceptance tests for REQ-001 (AC1–AC5) |
-| `tests/test_complete_task.py` | acceptance tests for REQ-002 (completing a task) |
-
-CI runs the same command on Python 3.9 and 3.11 for every push to `main` and every pull
-request.
-
-## Repository layout
-
-```text
-boss_agent/          application package (models, dates, store, CLI)
-tests/               pytest suite
-docs/                backlog, requirements, review records, trial write-up
-.github/             CI workflow, PR and requirement templates
-EVIDENCE_INDEX.md    map from each assessment requirement to its evidence
-CONTRIBUTING.md      branching, commit, PR and review rules the team follows
-```
-
-Writes are atomic: the task file is replaced via a temporary file and `os.replace`, so an
-interrupted save cannot truncate the list.
-
-## Team and roles
-
-| Member | GitHub | Role in the trial |
-| --- | --- | --- |
-| Li Chenhao | `@lichenhao` (placeholder) | Repository owner, CI, integration and merge |
-| Jiang Yu | `@jiangyu` (placeholder) | Requirements, backlog, PR description |
-| Huang Yuwen | `@huangyuwen` (placeholder) | Implementation and automated tests |
-| Pan Yifei | `@panyifei` (placeholder) | Review and evidence |
-
-## Further reading
-
-- [docs/backlog.md](docs/backlog.md) — prioritised backlog with acceptance criteria
-- [docs/requirements/](docs/requirements) — one file per tracked requirement
-- [docs/PR-001.md](docs/PR-001.md) — the change under review, with red/green evidence
-- [docs/reviews/PR-001-review.md](docs/reviews/PR-001-review.md) — the review that changed it
-- [docs/workflow-trial.md](docs/workflow-trial.md) — what the trial produced and what we learned
-- [EVIDENCE_INDEX.md](EVIDENCE_INDEX.md) — the evidence index required for submission
+- `backend/`：FastAPI、SQLite、采集任务、简历生成与 PDF 接口
+- `extension/`：本地 BOSS 岗位采集扩展（1.3.0，不含发送功能）
+- `frontend/`：岗位工作台和 A4 简历编辑器
+- `data/`：本地数据库、采集状态与生成的 PDF（自动生成）
+- `collector/`：旧 Playwright 采集器，仅保留作历史参考，不参与当前运行
