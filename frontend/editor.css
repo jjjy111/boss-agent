@@ -1,0 +1,13 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #e8ecf3; color: #1d2433; font: 14px -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif; }
+.toolbar { position: sticky; top: 0; z-index: 2; display: flex; gap: 16px; align-items: center; padding: 14px 22px; background: #172033; color: #fff; flex-wrap: wrap; }
+.toolbar label { display: flex; gap: 6px; align-items: center; font-size: 12px; }
+.toolbar input { width: 72px; accent-color: #8ea9ff; }
+.actions { display: flex; gap: 10px; margin-left: auto; }
+button { padding: 9px 13px; border: 0; border-radius: 8px; cursor: pointer; background: #eef1f8; color: #25314a; }
+button.primary { background: #315efb; color: #fff; }
+.canvas { min-height: calc(100vh - 58px); padding: 28px; overflow: auto; }
+.a4-page { width: 794px; min-height: 1123px; margin: 0 auto; padding: 70px 64px; outline: none; background: #fff; box-shadow: 0 3px 20px rgba(24, 39, 75, .18); font-family: "Songti SC", "STSong", serif; font-size: var(--resume-font-size, 11pt); line-height: var(--resume-line-height, 1.65); white-space: pre-wrap; }
+.a4-page:focus { box-shadow: 0 0 0 2px #315efb, 0 3px 20px rgba(24, 39, 75, .18); }
+@media (max-width: 850px) { .toolbar { align-items: flex-start; flex-wrap: wrap; }.actions { margin-left: 0; }.canvas { padding: 12px; }.a4-page { width: 100%; min-height: calc(100vh - 90px); padding: 36px 28px; } }
+@media print { @page { size: A4; margin: 0; } body { background: #fff; } .toolbar { display: none; } .canvas { padding: 0; } .a4-page { width: 210mm; min-height: 297mm; margin: 0; padding: 18mm 17mm; box-shadow: none; } }

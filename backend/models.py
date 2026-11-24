@@ -43,3 +43,13 @@ class TailoredResume(Base):
     changes_confirmed: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class Application(Base):
+    __tablename__ = "applications"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    job_id: Mapped[int] = mapped_column(ForeignKey("jobs.id"))
+    tailored_resume_id: Mapped[int] = mapped_column(ForeignKey("tailored_resumes.id"))
+    status: Mapped[str] = mapped_column(String(40), default="待确认")
+    feedback: Mapped[str] = mapped_column(Text, default="")
+    applied_at: Mapped[Optional[datetime]] = mapped_column(DateTime, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

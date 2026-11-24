@@ -1,0 +1,16 @@
+.pdf-gate {
+  margin-top: 20px;
+  padding: 18px;
+  background: #fff;
+  border: 1px solid #dfe5f1;
+  border-radius: 12px;
+}
+
+.pdf-preview {
+  width: 100%;
+  height: 760px;
+  border: 1px solid #cfd7e6;
+  border-radius: 8px;
+  background: #f5f6fa;
+  margin: 8px 0 14px;
+}

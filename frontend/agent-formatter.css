@@ -1,0 +1,140 @@
+/* Integration chrome only; resume typography comes from the reference project. */
+.agent-version-actions { display:flex; flex-wrap:wrap; gap:6px; padding:12px; border-bottom:1px solid #e7e1db; }
+.agent-version-actions button { font-size:12px; border:1px solid #e7e1db; }
+.agent-version { display:flex !important; align-items:center; gap:6px; }
+.agent-version .resume-list-name { flex:1; min-width:0; background:none; border:none; text-align:left; padding:10px 0; color:inherit; cursor:pointer; }
+.agent-delete { font:inherit; font-size:11px; color:#99635b; background:none; border:0; cursor:pointer; padding:6px; }
+.agent-delete:hover { background:#f7e5e1; border-radius:4px; }
+.agent-busy #toolbar, .agent-busy #resume-list-panel { pointer-events:none; opacity:.65; }
+#resume-page [data-profile-field="headline"][data-empty="true"] { display:none; }
+
+/*
+ * Tailored resumes are reviewed one at a time.  The reference formatter's
+ * permanent right-hand version panel makes the A4 canvas unnecessarily wide
+ * and causes horizontal scrolling, so only this mode uses a focused,
+ * single-column workspace.  Generic resumes keep the original version panel.
+ */
+body.agent-tailored-mode { overflow-x: hidden; }
+body.agent-tailored-mode #app {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "toolbar"
+    "privacy"
+    "workspace";
+  padding-bottom: 88px;
+}
+body.agent-tailored-mode #toolbar {
+  flex-wrap: wrap;
+  min-width: 0;
+  height: auto;
+}
+body.agent-tailored-mode #toolbar .toolbar-primary-actions { display: none; }
+body.agent-tailored-mode #resume-list-panel { display: none !important; }
+body.agent-tailored-mode #workspace {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  padding: 28px 16px 42px;
+  overflow: visible;
+  overflow-x: hidden;
+}
+body.agent-tailored-mode #add-gutter { display: none; }
+body.agent-tailored-mode #resume-page {
+  flex: 0 1 210mm;
+  max-width: 100%;
+}
+
+/* Generic resumes use the same focused A4 canvas as tailored resumes.  The
+ * version manager remains available as an overlay so it never creates a
+ * second layout column or horizontal scroll. */
+body.agent-base-mode { overflow-x: hidden; }
+body.agent-base-mode #app {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas:
+    "toolbar"
+    "privacy"
+    "workspace";
+  padding-bottom: 88px;
+}
+body.agent-base-mode #toolbar {
+  flex-wrap: wrap;
+  min-width: 0;
+  height: auto;
+}
+body.agent-base-mode #toolbar .toolbar-primary-actions { display: none; }
+body.agent-base-mode #workspace {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  padding: 28px 16px 42px;
+  overflow: visible;
+  overflow-x: hidden;
+}
+body.agent-base-mode #add-gutter { display: none; }
+body.agent-base-mode #resume-page {
+  flex: 0 1 210mm;
+  width: min(210mm, 100%);
+  max-width: 100%;
+}
+body.agent-base-mode #resume-list-panel {
+  position: fixed;
+  z-index: 220;
+  top: 76px;
+  right: 12px;
+  width: min(360px, calc(100vw - 24px));
+  max-height: calc(100vh - 104px);
+  overflow: auto;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  display: none;
+}
+body.agent-base-mode.agent-version-panel-open #resume-list-panel { display: flex; }
+body.agent-base-mode #resume-list-panel .panel-header {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+}
+body.agent-base-mode .agent-version-panel-close { display: inline-flex; }
+body.agent-base-mode #agent-bottom-actions {
+  padding-bottom: max(9px, env(safe-area-inset-bottom));
+}
+
+/* The review / export flow stays visible without taking space beside A4. */
+#agent-bottom-actions {
+  position: fixed;
+  z-index: 160;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  width: max-content;
+  max-width: calc(100vw - 24px);
+  padding: 9px;
+  border: 1px solid rgba(80, 65, 48, .16);
+  border-radius: 12px;
+  background: rgba(255, 252, 248, .96);
+  box-shadow: 0 8px 28px rgba(35, 28, 20, .18);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+#agent-bottom-actions .toolbar-btn { border: 1px solid var(--border-strong); }
+#agent-bottom-actions .toolbar-btn-primary { border-color: var(--accent); }
+
+@media (max-width: 860px) {
+  body.agent-tailored-mode #toolbar { padding-inline: 10px; gap: 5px; }
+  body.agent-tailored-mode #workspace { padding: 16px 8px 42px; }
+  body.agent-tailored-mode #resume-page { max-width: calc(100vw - 16px); }
+  body.agent-base-mode #toolbar { padding-inline: 10px; gap: 5px; }
+  body.agent-base-mode #workspace { padding: 16px 8px 42px; }
+  body.agent-base-mode #resume-page { width: calc(100vw - 16px); }
+  #agent-bottom-actions { bottom: 16px; }
+}
+@media print {
+  #app { display:block !important; height:auto !important; overflow:visible !important; }
+  #workspace { min-width:0 !important; }
+  #agent-bottom-actions { display:none !important; }
+}
