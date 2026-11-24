@@ -1,12 +1,15 @@
 # BOSS - Agent MVP
 
-本地运行的产品求职工作台：BOSS 岗位采集、岗位归档、通用简历版本、DeepSeek 定制简历、A4 在线编辑、PDF 导出与定稿确认。
+A local job-search workbench: BOSS posting collection, role archiving, general résumé
+versions, DeepSeek tailoring, A4 editing in the browser, PDF export and final confirmation.
 
-BOSS - Agent 只在本机准备材料，**不代替用户向 BOSS 发送任何消息**，也不读取或上传 BOSS 的 Cookie。
+BOSS - Agent only prepares material on the local machine. **It never sends any message to
+BOSS on the user's behalf**, and never reads or uploads BOSS cookies.
 
-## 启动
+## Getting started
 
-macOS 可直接双击项目中的 `启动求职Agent.command`。也可以在项目目录运行：
+On macOS you can double-click `启动求职Agent.command` in the project folder. You can also
+run the following in the project directory:
 
 ```bash
 python3 -m venv .venv
@@ -14,50 +17,120 @@ python3 -m venv .venv
 .venv/bin/python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-打开 <http://127.0.0.1:8000/>。网页和每日任务依赖这个终端持续运行。
+Open <http://127.0.0.1:8000/>. The page and the daily tasks depend on this terminal
+staying open.
 
-## BOSS 岗位采集
+## BOSS job collection
 
-采集器使用项目自带的 Manifest V3 Chrome 扩展，不再使用 Playwright、远程调试端口或 CDP 控制浏览器。BOSS - Agent、BOSS 和扩展都运行在平时使用的同一个 Chrome 中。Chrome 137 及以上不再接受命令行自动加载本地扩展，因此首次使用需要手动安装一次。
+Collection uses the project's own Manifest V3 Chrome extension. It no longer uses
+Playwright, a remote debugging port or CDP control of the browser. BOSS - Agent, BOSS and
+the extension all run in the same Chrome you normally use. Chrome 137 and later no longer
+loads local extensions automatically from the command line, so a one-time manual
+installation is required.
 
-首次切换到扩展版时：
+To switch to the extension version for the first time:
 
-1. 在打开BOSS - Agent 的当前 Chrome 中，新建标签页并输入 `chrome://extensions/`。
-2. 开启右上角“开发者模式”。返回BOSS - Agent 点击“① 打开扩展文件夹”，然后在扩展管理页点击“加载已解压的扩展程序”，选择 Finder 中的 `extension` 文件夹。这个步骤只需完成一次。
-3. 返回BOSS - Agent 点击“② 打开 BOSS”，在新标签页登录；遇到安全验证时手动完成，并保持 Chrome 打开。
-4. 返回BOSS - Agent。页面会自动刷新状态；看到“扩展在线 · BOSS 已登录”后点击“立即采集”。
+1. In the Chrome that is running BOSS - Agent, open a new tab and go to `chrome://extensions/`.
+2. Turn on **Developer mode** in the top right. Return to BOSS - Agent and click
+   **Open extension folder**, then click **Load unpacked** on the extensions page and
+   select the `extension` folder in Finder. This only has to be done once.
+3. Return to BOSS - Agent and click **Open BOSS**, then log in in the new tab. Complete any
+   security check manually and keep Chrome open.
+4. Return to BOSS - Agent. The page refreshes its status automatically; once it shows
+   *extension online, BOSS logged in*, click **Collect now**.
 
-采集任务按杭州、宁波、上海排序，搜索产品相关岗位并读取完整 JD；排除标题含“运营”、明确要求硕士或博士、以及明确要求两年以上经验的岗位。扩展会读取可见列表分页和岗位详情，并把结果写入本地 SQLite。
+The collection task works through Hangzhou, Ningbo and Shanghai in that order, searches for
+product-related roles and reads the full JD. It excludes roles whose title contains 运营,
+roles that explicitly require a master's or doctoral degree, and roles that explicitly
+require more than two years of experience. The extension reads the visible list pages and
+the role details, and writes the results into the local SQLite database.
 
-- 只有三座城市和完整 JD 均扫描完成时，才归档本次未再出现的旧岗位。
-- 登录失效、安全验证、列表不完整或详情缺失都会保存为失败/部分完成，不会误归档旧岗位。
-- 采集只在点击“立即采集”时触发；应用不再注册任何定时任务，电脑只需在采集时保持唤醒。
-- BOSS 登录状态由当前 Chrome 自己保存；扩展只访问 `zhipin.com` 和本机 `127.0.0.1:8000`，不会读取或上传 Cookie 内容。
+- Old roles that no longer appear are archived only when all three cities and the complete
+  JDs have been scanned.
+- Login expiry, security checks, an incomplete list or missing details are stored as a
+  failed or partial run, so previously collected roles are never archived by mistake.
+- Collection is triggered only by clicking **Collect now**; the application registers no
+  scheduled tasks, and the computer only needs to stay awake while collecting.
+- The BOSS login state is maintained by Chrome itself. The extension reaches only
+  `zhipin.com` and `127.0.0.1:8000` on this machine, and never reads or uploads cookie
+  content.
 
-BOSS 页面结构或安全策略可能变化。若页面要求验证，采集会暂停并保留对应页面，完成验证后重新点击“立即采集”。请避免短时间内高频重复运行。
+The BOSS page structure or security policy may change. If the page asks for verification,
+collection pauses and keeps that page; complete the check and click **Collect now** again.
+Please avoid running it repeatedly in a short period of time.
 
-## DeepSeek 定制简历
+## DeepSeek tailored résumé
 
-1. 在项目根目录 `.env` 填写 `DEEPSEEK_API_KEY`；该文件已被 Git 忽略。
-2. 在岗位详情选择一个通用简历版本，点击“根据岗位生成简历”。同一岗位与同一通用版本再次生成会覆盖当前草稿。
-3. 系统保留通用简历全部原始内容，只允许换序、润色和有事实依据的补充；同时保存修改原因、JD 关键词覆盖和风险。
-4. 点击“编辑定制简历”会在新标签页打开 A4 编辑器。确认前，仅与通用版本不同的文字显示淡黄色高亮。
-5. 点击“确认修改并定稿”后高亮永久消失，但仍可继续编辑、预览和导出 PDF。导出后可点击“确认 PDF 定稿”，记录该岗位的材料已经定稿。
+1. Add `DEEPSEEK_API_KEY` to `.env` at the project root; the file is ignored by Git.
+2. In the job detail, choose a general résumé version and click
+   **Generate résumé for this job**. Generating again for the same job and the same general
+   version overwrites the current draft.
+3. The system keeps the entire original content of the general résumé and allows only
+   reordering, rewording and factually supported additions; it also stores the reasons for
+   the changes, JD keyword coverage and risks.
+4. Clicking **Edit tailored résumé** opens the A4 editor in a new tab. Before confirmation,
+   only the text that differs from the general version is highlighted in pale yellow.
+5. After clicking **Confirm changes** the highlight disappears permanently, but the draft
+   remains editable, previewable and exportable. After exporting, click **Confirm PDF** to
+   record that the material for this job is final.
 
-证件照按通用简历版本保存在本机。可在通用简历编辑页点击“上传”绑定照片；该版本生成的定制简历会自动继承并显示在右上角，“另存为新版本”也会复制照片。更新或删除照片后，已生成的定制简历需要重新导出并确认。
+The photo is stored locally per general résumé version. Click **Upload** on the general
+résumé edit page to bind a photo; drafts generated from that version inherit it and show it
+in the top right corner, and **Save as a new version** copies the photo as well. After
+updating or deleting the photo, tailored résumés that have already been generated must be
+exported and confirmed again.
 
-API Key 仅由本机后端读取，不会返回给浏览器。
+The API key is read only by the local backend and is never returned to the browser.
 
-## 范围说明
+## Scope
 
-早先版本在确认 PDF 后会自动截图、生成打招呼文案，并通过 Chrome 扩展向 BOSS 发送文字和简历图片。这条投递链路已经移除：`backend/delivery.py`、`Application`/`BossSendTask` 两张表、`/api/tailored/{id}/apply`、`/send-preview`、`/send`、`/api/applications` 以及扩展里的发送任务都已删除。
+Earlier versions automatically captured the confirmed PDF, generated a greeting message and
+sent both the text and the résumé image to BOSS through the Chrome extension. That delivery
+pipeline has been removed: `backend/delivery.py`, the `Application`/`BossSendTask` tables,
+`/api/tailored/{id}/apply`, `/send-preview`, `/send`, `/api/applications`, and the
+extension's send tasks have all been deleted.
 
-现在的流程在“确认 PDF 定稿”结束，材料留在本机，是否发送、如何发送由用户在 BOSS 页面自行决定。历史数据库中可能仍残留 `applications`、`boss_send_tasks` 两张旧表，它们不再被读取，可以直接忽略或手动删除。
+The workflow now ends at **Confirm PDF**: the material stays on the local machine, and
+whether and how to send it is the user's own decision on the BOSS page. An existing
+database may still contain the old `applications` and `boss_send_tasks` tables; they are no
+longer read and can be ignored or dropped manually.
 
-## 目录
+## Repository layout
 
-- `backend/`：FastAPI、SQLite、采集任务、简历生成与 PDF 接口
-- `extension/`：本地 BOSS 岗位采集扩展（1.3.0，不含发送功能）
-- `frontend/`：岗位工作台和 A4 简历编辑器
-- `data/`：本地数据库、采集状态与生成的 PDF（自动生成）
-- `collector/`：旧 Playwright 采集器，仅保留作历史参考，不参与当前运行
+- `backend/`: FastAPI app, SQLite, collection tasks, résumé generation and PDF endpoints
+- `extension/`: local BOSS collection extension (1.3.0, no sending)
+- `frontend/`: job workbench and A4 résumé editor
+- `data/`: local database, collection state and generated PDFs (created automatically)
+- `collector/`: the old Playwright collector, kept for historical reference only; not used
+  at runtime
+- `scripts/`: seed script for demonstration data
+- `docs/product/`: acceptance logs for each iteration
+
+## Two iterations
+
+| Iteration | Delivered | Pull requests |
+| --- | --- | --- |
+| 1 | Collection pipeline from the Playwright prototype to the Manifest V3 extension; three-city rotation with full-JD validation; job workbench with date filter and archive view | #3 #4 #5 |
+| 2 | DeepSeek tailoring with grounding checks; tailoring, PDF export and confirmation endpoints; résumé versions and photo binding; A4 editor; final confirmation | #7 #8 |
+
+Both iterations followed the same workflow: one branch per area, a pull request for every
+branch, a review from a member who did not write the code, and a merge commit only after
+that review. The acceptance evidence for each iteration is kept next to the code it
+describes.
+
+## Verification
+
+- `scripts/seed_demo_data.py` seeds six fictional roles (one archived) so the list, the
+  filters and the archive view can be exercised without a real BOSS account.
+- Iteration 1 acceptance log: `docs/product/测试记录-第1轮.md`.
+- Iteration 2 acceptance log: `docs/product/测试记录-第2轮.md`.
+- All sample data is fictional; no real résumé content is included.
+
+## Known limitations
+
+- Collection depends on the current BOSS page structure; a layout change requires updating
+  the selectors in `extension/`.
+- The city order is fixed in the code rather than configurable.
+- The application assumes a single local user and has no authentication of its own.
+- The two acceptance-log filenames are still in Chinese, because they were created during
+  the iterations and are referenced from the pull requests.
